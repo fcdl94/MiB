@@ -1,7 +1,4 @@
 # Modeling the Background for Incremental Learning in Semantic Segmentation
-This is the accompanying code for the CVPR submission #5832.
-
-Please, remember that this code should remain private. We will publish it after the reviewing process.
 
 # Requirements
 This repository uses the following libraries:
@@ -24,10 +21,10 @@ We provide the scripts to download them in 'data/download_\<dataset_name\>.sh'.
 The script takes no inputs but use it in the target directory (where you want to download data). 
 
 # How to perform training
-The most important file is run_inc.py, that is in charge to start the training or test procedure.
+The most important file is run.py, that is in charge to start the training or test procedure.
 To run it, simpy use the following command:
 
-> python -m torch.distributed.launch --nproc_per_node=\<num_GPUs\> run_inc.py --data_root \<data_folder\> --name \<exp_name\> .. other args ..
+> python -m torch.distributed.launch --nproc_per_node=\<num_GPUs\> run.py --data_root \<data_folder\> --name \<exp_name\> .. other args ..
 
 The default is to use a pretraining for the backbone used, that is searched in the pretrained folder of the project. 
 We used the pretrained model released by the authors of In-place ABN (as said in the paper), that can be found here:
@@ -53,7 +50,7 @@ For all details please follow the information provided using the help option.
 #### Example commands
 
 LwF on the 100-50 setting of ADE20K, step 0:
-> python -m torch.distributed.launch --nproc_per_node=2 run_inc.py --data_root data --batch_size 12 --dataset ade --name LWF --task 100-50 --step 0 --lr 0.01 --epochs 60 --method LWF
+> python -m torch.distributed.launch --nproc_per_node=2 run.py --data_root data --batch_size 12 --dataset ade --name LWF --task 100-50 --step 0 --lr 0.01 --epochs 60 --method LWF
 
 MIB on the 50b setting of ADE20K, step 2:
 > python -m torch.distributed.launch --nproc_per_node=2 run_inc.py --data_root data --batch_size 12 --dataset ade --name MIB --task 100-50 --step 2 --lr 0.001 --epochs 60 --method MIB
