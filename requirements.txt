@@ -106,7 +106,7 @@ python-dateutil==2.8.0
 python-debian==0.1.32
 pytz==2018.3
 pyxdg==0.25
-PyYAML==3.12
+PyYAML==5.1
 pyzmq==18.1.0
 qtconsole==4.5.5
 reportlab==3.4.0
