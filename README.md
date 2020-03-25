@@ -75,8 +75,8 @@ that will skip all the training procedure and test the model on test data.
 ## Cite us
 If you use this repository, please consider to cite
 
-       @inProceedings{mancini2019adagraph,
-       author = {Cermelli, Fabio and Mancini, Massimilano and Rota Bul\`o, Samuel and Ricci, Elisa and Caputo, Barbara},
+       @inProceedings{cermelli2020modeling,
+       author = {Cermelli, Fabio and Mancini, Massimiliano and Rota Bul\`o, Samuel and Ricci, Elisa and Caputo, Barbara},
        title  = {Modeling the Background for Incremental Learning in Semantic Segmentation},
        booktitle = {Computer Vision and Pattern Recognition (CVPR)},
        year      = {2020},
