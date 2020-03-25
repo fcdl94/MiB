@@ -3,7 +3,7 @@ This is the official PyTorch implementation of our work: "Modeling the Backgroun
 
 In this paper, we present a novel approach and we define a new evaluation benchmark for incremental learning in semantic segmentation. We asses the performance of our method and previous state-of-the-art methods on Pascal-VOC 2012 and ADE20K datasets. 
 
-![teaser](https://github.com/fcdl94/MiB/raw/master/teaser.pdf)
+![teaser](https://raw.githubusercontent.com/fcdl94/MiB/master/teaser.png)
 
 # Requirements
 This repository uses the following libraries:
