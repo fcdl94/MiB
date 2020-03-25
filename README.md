@@ -1,4 +1,9 @@
 # Modeling the Background for Incremental Learning in Semantic Segmentation
+This is the official PyTorch implementation of our work: "Modeling the Background for Incremental Learning in Semantic Segmentation" accepted at CVPR 2020.
+
+In this paper, we present a novel approach and we define a new evaluation benchmark for incremental learning in semantic segmentation. We asses the performance of our method and previous state-of-the-art methods on Pascal-VOC 2012 and ADE20K datasets. 
+
+![teaser](https://raw.githubusercontent.com/fcdl94/MiB/master/img/teaser.png)
 
 # Requirements
 This repository uses the following libraries:
@@ -66,3 +71,14 @@ Once you trained the model, you can see the result on tensorboard (we perform th
 > --test
 
 that will skip all the training procedure and test the model on test data.
+
+## Cite us
+If you use this repository, please consider to cite
+
+       @inProceedings{mancini2019adagraph,
+       author = {Cermelli, Fabio and Mancini, Massimilano and Rota Bul\`o, Samuel and Ricci, Elisa and Caputo, Barbara},
+       title  = {Modeling the Background for Incremental Learning in Semantic Segmentation},
+       booktitle = {Computer Vision and Pattern Recognition (CVPR)},
+       year      = {2020},
+       month     = {June}
+       }
