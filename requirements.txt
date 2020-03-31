@@ -6,7 +6,7 @@ astor==0.8.0
 attrs==19.1.0
 Automat==0.6.0
 backcall==0.1.0
-bleach==3.1.0
+bleach==3.1.4
 Brlapi==0.6.6
 certifi==2018.1.18
 chardet==3.0.4
