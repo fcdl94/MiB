@@ -58,13 +58,13 @@ LwF on the 100-50 setting of ADE20K, step 0:
 > python -m torch.distributed.launch --nproc_per_node=2 run.py --data_root data --batch_size 12 --dataset ade --name LWF --task 100-50 --step 0 --lr 0.01 --epochs 60 --method LWF
 
 MIB on the 50b setting of ADE20K, step 2:
-> python -m torch.distributed.launch --nproc_per_node=2 run_inc.py --data_root data --batch_size 12 --dataset ade --name MIB --task 100-50 --step 2 --lr 0.001 --epochs 60 --method MIB
+> python -m torch.distributed.launch --nproc_per_node=2 run.py --data_root data --batch_size 12 --dataset ade --name MIB --task 100-50 --step 2 --lr 0.001 --epochs 60 --method MIB
 
 LWF-MC on 15-5 disjoint setting of VOC, step 1:
-> python -m torch.distributed.launch --nproc_per_node=2 run_inc.py --data_root data --batch_size 12 --dataset voc --name LWF-MC --task 15-5 --step 1 --lr 0.001 --epochs 30 --method LWF-MC
+> python -m torch.distributed.launch --nproc_per_node=2 run.py --data_root data --batch_size 12 --dataset voc --name LWF-MC --task 15-5 --step 1 --lr 0.001 --epochs 30 --method LWF-MC
 
 RW on 15-1 overlapped setting of VOC, step 1:
-> python -m torch.distributed.launch --nproc_per_node=2 run_inc.py --data_root data --batch_size 12 --dataset voc --name LWF-MC --task 15-5s --overlapped --step 1 --lr 0.001 --epochs 30 --method RW
+> python -m torch.distributed.launch --nproc_per_node=2 run.py --data_root data --batch_size 12 --dataset voc --name LWF-MC --task 15-5s --overlapped --step 1 --lr 0.001 --epochs 30 --method RW
 
 Once you trained the model, you can see the result on tensorboard (we perform the test after the whole training)
  or you can test it by using the same script and parameters but using the command 
