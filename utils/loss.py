@@ -101,7 +101,7 @@ class UnbiasedCrossEntropy(nn.Module):
         outputs[:, 0] = torch.logsumexp(inputs[:, 0:old_cl], dim=1) - den  # B, H, W       p(O)
         outputs[:, old_cl:] = inputs[:, old_cl:] - den.unsqueeze(dim=1)    # B, N, H, W    p(N_i)
 
-        labels = targets    # B, H, W
+        labels = targets.clone()    # B, H, W
         labels[targets < old_cl] = 0  # just to be sure that all labels old belongs to zero
 
         loss = F.nll_loss(outputs, labels, ignore_index=self.ignore_index, reduction=self.reduction)
