@@ -9,7 +9,7 @@ from inplace_abn import InPlaceABNSync, InPlaceABN, ABN
 from functools import partial, reduce
 
 import models
-from modules import DeeplabV3
+from modules import BiSeNet
 
 
 def make_model(opts, classes=None):
@@ -33,13 +33,19 @@ def make_model(opts, classes=None):
         del pre_dict  # free memory
 
     head_channels = 256
-
+    head = BiSeNet(opts.num_classes, body)
+    # HERE
+    """
     head = DeeplabV3(body.out_channels, head_channels, 256, norm_act=norm,
                      out_stride=opts.output_stride, pooling_size=opts.pooling)
+    """
 
     if classes is not None:
+        # model = IncrementalSegmentationModule(BiSeNet, ...)
         model = IncrementalSegmentationModule(body, head, head_channels, classes=classes, fusion_mode=opts.fusion_mode)
     else:
+        # model = BiSeNet(...)
+        # -- fold
         model = SegmentationModule(body, head, head_channels, opts.num_classes, opts.fusion_mode)
 
     return model
