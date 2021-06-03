@@ -118,9 +118,8 @@ def main(opts):
 
     logger = Logger(logdir_full, rank=0, debug=opts.debug, summary=opts.visualize, step=opts.step)
 
-    logger.print(f"Device: ")
-
     device = torch.device('cuda') if cuda.is_available() else torch.device('cpu')
+    logger.print(f"Device: {device}")
 
     # Set up random seed
     torch.manual_seed(opts.random_seed)
