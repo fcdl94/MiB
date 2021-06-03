@@ -36,8 +36,7 @@ def make_model(opts, classes=None):
     else:
         # model = BiSeNet(...)
         # -- fold
-        # model = SegmentationModule(body, head, head_channels, opts.num_classes, opts.fusion_mode)
-        pass
+        model = SegmentationModule(body, head, head_channels, opts.num_classes, opts.fusion_mode)
 
     return model
 
