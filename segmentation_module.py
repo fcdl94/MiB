@@ -23,7 +23,7 @@ def make_model(opts, classes=None):
         del pre_dict  # free memory
 
     head_channels = 256
-    head = BiSeNet(opts.num_classes, body)
+    # head = BiSeNet(opts.num_classes, body)
     # HERE
     """
     head = DeeplabV3(body.out_channels, head_channels, 256, norm_act=norm,
