@@ -123,7 +123,7 @@ def get_argparser():
                         help="epoch interval for saving model (default: 1)")
 
     # Model Options
-    parser.add_argument("--backbone", type=str, default='resnet101',
+    parser.add_argument("--backbone", type=str, default='resnet50',
                         choices=['resnet50', 'resnet101'], help='backbone for the body (def: resnet50)')
     parser.add_argument("--output_stride", type=int, default=16,
                         choices=[8, 16], help='stride for the backbone (def: 16)')

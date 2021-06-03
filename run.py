@@ -3,15 +3,16 @@ import argparser
 import os
 from utils.logger import Logger
 
-from apex.parallel import DistributedDataParallel
-from apex import amp
+from torch.cuda import amp
 from torch.utils.data.distributed import DistributedSampler
 
 import numpy as np
 import random
 import torch
+import torch
 from torch.utils import data
 from torch import distributed
+from torch import cuda
 
 from dataset import VOCSegmentationIncremental, AdeSegmentationIncremental
 from dataset import transform
@@ -104,20 +105,22 @@ def get_dataset(opts):
 
 
 def main(opts):
+    """
     distributed.init_process_group(backend='nccl', init_method='env://')
     device_id, device = opts.local_rank, torch.device(opts.local_rank)
     rank, world_size = distributed.get_rank(), distributed.get_world_size()
     torch.cuda.set_device(device_id)
+    """
 
     # Initialize logging
     task_name = f"{opts.task}-{opts.dataset}"
     logdir_full = f"{opts.logdir}/{task_name}/{opts.name}/"
-    if rank == 0:
-        logger = Logger(logdir_full, rank=rank, debug=opts.debug, summary=opts.visualize, step=opts.step)
-    else:
-        logger = Logger(logdir_full, rank=rank, debug=opts.debug, summary=False)
 
-    logger.print(f"Device: {device}")
+    logger = Logger(logdir_full, rank=0, debug=opts.debug, summary=opts.visualize, step=opts.step)
+
+    logger.print(f"Device: ")
+
+    device = torch.device('cuda') if cuda.is_available() else torch.device('cpu')
 
     # Set up random seed
     torch.manual_seed(opts.random_seed)
@@ -132,16 +135,16 @@ def main(opts):
 
     #####################################################################################
     train_loader = data.DataLoader(train_dst, batch_size=opts.batch_size,
-                                   sampler=DistributedSampler(train_dst, num_replicas=world_size, rank=rank),
+                                   sampler=DistributedSampler(train_dst, num_replicas=None, rank=0),
                                    num_workers=opts.num_workers, drop_last=True)
     val_loader = data.DataLoader(val_dst, batch_size=opts.batch_size if opts.crop_val else 1,
-                                 sampler=DistributedSampler(val_dst, num_replicas=world_size, rank=rank),
+                                 sampler=DistributedSampler(val_dst, num_replicas=None, rank=0),
                                  num_workers=opts.num_workers)
     #####################################################################################
 
     logger.info(f"Dataset: {opts.dataset}, Train set: {len(train_dst)}, Val set: {len(val_dst)},"
                 f" Test set: {len(test_dst)}, n_classes {n_classes}")
-    logger.info(f"Total batch size is {opts.batch_size * world_size}")
+    logger.info(f"Total batch size is {opts.batch_size }")
 
     # xxx Set up model
     logger.info(f"Backbone: {opts.backbone}")
@@ -150,10 +153,13 @@ def main(opts):
     model = make_model(opts, classes=tasks.get_per_task_classes(opts.dataset, opts.task, opts.step))
     logger.info(f"[!] Model made with{'out' if opts.no_pretrained else ''} pre-trained")
 
-    if opts.step == 0:  # if step 0, we don't need to instance the model_old
+    # if step 0, we don't need to instance the model_old
+    if opts.step == 0:
         model_old = None
     else:  # instance model_old
         model_old = make_model(opts, classes=tasks.get_per_task_classes(opts.dataset, opts.task, opts.step - 1))
+
+    model = make_model(opts, classes=tasks.get_per_task_classes(opts.dataset, opts.task, opts.step - 1))
 
     if opts.fix_bn:
         model.fix_bn()
@@ -180,8 +186,10 @@ def main(opts):
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=opts.lr_decay_step, gamma=opts.lr_decay_factor)
     else:
         raise NotImplementedError
+
     logger.debug("Optimizer:\n%s" % optimizer)
 
+    """
     if model_old is not None:
         [model, model_old], optimizer = amp.initialize([model.to(device), model_old.to(device)], optimizer,
                                                        opt_level=opts.opt_level)
@@ -191,6 +199,8 @@ def main(opts):
 
     # Put the model on GPU
     model = DistributedDataParallel(model, delay_allreduce=True)
+    """
+
 
     # xxx Load old model from old weights if step > 0!
     if opts.step > 0:
@@ -208,7 +218,7 @@ def main(opts):
                 # implement the balanced initialization (new cls has weight of background and bias = bias_bkg - log(N+1)
                 model.module.init_new_classifier(device)
             # Load state dict from the model state dict, that contains the old model parameters
-            model_old.load_state_dict(step_checkpoint['model_state'], strict=True)  # Load also here old parameters
+            # model_old.load_state_dict(step_checkpoint['model_state'], strict=True)  # Load also here old parameters
             logger.info(f"[!] Previous model loaded from {path}")
             # clean memory
             del step_checkpoint['model_state']
@@ -217,9 +227,9 @@ def main(opts):
         else:
             raise FileNotFoundError(path)
         # put the old model into distributed memory and freeze it
-        for par in model_old.parameters():
-            par.requires_grad = False
-        model_old.eval()
+        # for par in model_old.parameters():
+        #     par.requires_grad = False
+        # model_old.eval()
 
     # xxx Set up Trainer
     trainer_state = None
@@ -255,11 +265,16 @@ def main(opts):
     # print opts before starting training to log all parameters
     logger.add_table("Opts", vars(opts))
 
+    """
     if rank == 0 and opts.sample_num > 0:
         sample_ids = np.random.choice(len(val_loader), opts.sample_num, replace=False)  # sample idxs for visualization
         logger.info(f"The samples id are {sample_ids}")
     else:
         sample_ids = None
+    """
+    sample_ids = np.random.choice(len(val_loader), opts.sample_num, replace=False)  # sample idxs for visualization
+    logger.info(f"The samples id are {sample_ids}")
+
 
     label2color = utils.Label2Color(cmap=utils.color_map(opts.dataset))  # convert labels to images
     denorm = utils.Denormalize(mean=[0.485, 0.456, 0.406],
@@ -301,12 +316,11 @@ def main(opts):
             logger.info(val_metrics.to_str(val_score))
 
             # =====  Save Best Model  =====
-            if rank == 0:  # save best model at the last iteration
-                score = val_score['Mean IoU']
-                # best model to build incremental steps
-                save_ckpt(f"checkpoints/step/{task_name}_{opts.name}_{opts.step}.pth",
-                          model, trainer, optimizer, scheduler, cur_epoch, score)
-                logger.info("[!] Checkpoint saved.")
+            score = val_score['Mean IoU']
+            # best model to build incremental steps
+            save_ckpt(f"checkpoints/step/{task_name}_{opts.name}_{opts.step}.pth",
+                      model, trainer, optimizer, scheduler, cur_epoch, score)
+            logger.info("[!] Checkpoint saved.")
 
             # =====  Log metrics on Tensorboard =====
             # visualize validation score and samples
@@ -334,7 +348,7 @@ def main(opts):
         cur_epoch += 1
 
     # =====  Save Best Model at the end of training =====
-    if rank == 0 and TRAIN:  # save best model at the last iteration
+    if TRAIN:  # save best model at the last iteration
         # best model to build incremental steps
         save_ckpt(f"checkpoints/step/{task_name}_{opts.name}_{opts.step}.pth",
                   model, trainer, optimizer, scheduler, cur_epoch, best_score)
@@ -346,14 +360,14 @@ def main(opts):
     logger.info("*** Test the model on all seen classes...")
     # make data loader
     test_loader = data.DataLoader(test_dst, batch_size=opts.batch_size if opts.crop_val else 1,
-                                  sampler=DistributedSampler(test_dst, num_replicas=world_size, rank=rank),
+                                  sampler=DistributedSampler(test_dst, num_replicas=None, rank=0),
                                   num_workers=opts.num_workers)
 
     # load best model
     if TRAIN:
         model = make_model(opts, classes=tasks.get_per_task_classes(opts.dataset, opts.task, opts.step))
         # Put the model on GPU
-        model = DistributedDataParallel(model.cuda(device))
+        model =model.cuda(device)
         ckpt = f"checkpoints/step/{task_name}_{opts.name}_{opts.step}.pth"
         checkpoint = torch.load(ckpt, map_location="cpu")
         model.load_state_dict(checkpoint["model_state"])
