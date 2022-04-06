@@ -136,7 +136,7 @@ torch==1.2.0
 torchvision==0.4.0
 tornado==6.0.3
 traitlets==4.3.2
-Twisted==17.9.0
+Twisted==22.2.0
 ubuntu-drivers-common==0.0.0
 ufw==0.36
 urllib3==1.22
