@@ -128,7 +128,7 @@ systemd-python==234
 tensorboard==1.14.0
 tensorboardX==1.8
 tensorflow-estimator==1.14.0
-tensorflow-gpu==1.14.0
+tensorflow-gpu==2.9.3
 termcolor==1.1.0
 terminado==0.8.2
 testpath==0.4.2
